@@ -95,18 +95,18 @@ const Card = ({ title, allcampaign, setOpenModel, setDonateCampaign }) => {
                   </div>
                 )}
 
-                {/* ✅ STATUS */}
+                {/* ✅ STATUS */} /
                 <p className="mt-2 text-sm">
-                  Status:{" "}
-                  {campaign.status === "approved" && (
-                    <span className="text-green-600">Approved</span>
-                  )}
-                  {campaign.status === "pending" && (
-                    <span className="text-yellow-600">Pending</span>
-                  )}
-                  {campaign.status === "rejected" && (
-                    <span className="text-red-600">Rejected</span>
-                  )}
+                Status:{" "}
+                {campaign.deadline < Date.now() ? (
+                  <span className="text-gray-500">Expired</span>
+                ) : campaign.status === "approved" ? (
+                  <span className="text-green-600">Approved</span>
+                ) : campaign.status === "pending" ? (
+                  <span className="text-yellow-600">Pending</span>
+                ) : (
+                  <span className="text-red-600">Rejected</span>
+                )}
                 </p>
 
               </div>

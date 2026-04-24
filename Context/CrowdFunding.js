@@ -53,17 +53,24 @@ export const CrowdFundingProvider = ({ children }) => {
     }
   }, []);
 
-  // CREATE CAMPAIGN
+  // ✅ CREATE CAMPAIGN (FIXED)
   const createCampaign = async (campaign) => {
-    const { title, description, deadline, amount } = campaign;
+  const { title, description, deadline, amount } = campaign;
 
-    const web3Modal = new Web3Modal();
-    const connection = await web3Modal.connect();
+  // ✅ DATE VALIDATION
+  if (new Date(deadline).getTime() <= Date.now()) {
+    alert("Deadline must be a future date");
+    return;
+  }
 
-    const provider = new ethers.providers.Web3Provider(connection);
-    const signer = provider.getSigner();
-    const contract = fetchContract(signer);
+  const web3Modal = new Web3Modal();
+  const connection = await web3Modal.connect();
 
+  const provider = new ethers.providers.Web3Provider(connection);
+  const signer = provider.getSigner();
+  const contract = fetchContract(signer);
+
+  try {
     const tx = await contract.createCampaign(
       currentAccount,
       title,
@@ -74,15 +81,19 @@ export const CrowdFundingProvider = ({ children }) => {
 
     await tx.wait();
 
-    // DEFAULT STATUS = pending
-    const approvals = JSON.parse(localStorage.getItem("approvals")) || {};
-    const newId = Object.keys(approvals).length;
+    const campaigns = await contract.getCampaigns();
+    const newId = campaigns.length - 1;
 
+    const approvals = JSON.parse(localStorage.getItem("approvals")) || {};
     approvals[newId] = "pending";
+
     localStorage.setItem("approvals", JSON.stringify(approvals));
 
     window.location.reload();
-  };
+  } catch (error) {
+    console.log("Error creating campaign:", error);
+  }
+};
 
   // GET CAMPAIGNS
   const getCampaigns = async () => {
@@ -167,7 +178,7 @@ export const CrowdFundingProvider = ({ children }) => {
       );
   };
 
-  // ✅ DONATE (FIXED ERROR)
+  // DONATE
   const donate = async (pId, amount) => {
     const web3Modal = new Web3Modal();
     const connection = await web3Modal.connect();
@@ -186,7 +197,7 @@ export const CrowdFundingProvider = ({ children }) => {
     return tx;
   };
 
-  // ✅ GET DONATIONS (FIXED ERROR)
+  // GET DONATIONS
   const getDonations = async (pId) => {
     const provider = new ethers.providers.JsonRpcProvider("http://127.0.0.1:8545");
     const contract = fetchContract(provider);

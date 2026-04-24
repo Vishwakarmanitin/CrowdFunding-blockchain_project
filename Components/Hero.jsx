@@ -67,12 +67,12 @@ const Hero = ({ titleData, createCampaign }) => {
             
             {/* LEFT TEXT */}
             <div className="w-full max-w-xl mb-12 xl:mb-0 xl:pr-16 xl:w-7/12">
-              <h2 className="max-w-lg mb-6 font-sans text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl sm:leading-none">
+              <h2 className="max-w-lg mb-6 font-sans text-3xl font-bold tracking-tight text-white sm:text-4xl sm:leading-none">
                 Cryptocurrency <br className="hidden md:block" />
                 Crowd Funding App
               </h2>
 
-              <p className="max-w-xl mb-4 text-base text-gray-700 md:text-lg">
+              <p className="max-w-xl mb-4 text-base text-gray-500 md:text-lg">
                 A crowdfunding platform built on the Ethereum blockchain, 
                 allowing users to create and contribute to campaigns using cryptocurrency.
               </p>

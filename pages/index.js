@@ -1,10 +1,10 @@
-import React, {useEffect,useContext,useState} from "react";
+import React, { useEffect, useContext, useState } from "react";
 
-//INTERNAL IMPORT
+// INTERNAL IMPORT
 import { CrowdFundingContext } from "../Context/CrowdFunding";
-import {Hero,Card,PopUp} from "../Components";
+import { Hero, Card, PopUp } from "../Components";
 
-const index = () => {
+const Index = () => {
   const {
     titleData,
     getCampaigns,
@@ -12,58 +12,76 @@ const index = () => {
     donate,
     getUserCampaigns,
     getDonations,
+    currentAccount,
+    ADMIN_ADDRESS,
   } = useContext(CrowdFundingContext);
 
-  const [allcampaign, setAllcampaign] = useState();
-  const [usercampaign, setUsercampaign] = useState();
+  const [allcampaign, setAllcampaign] = useState([]);
+  const [usercampaign, setUsercampaign] = useState([]);
 
-useEffect(() => {
-  const fetchData = async () => {
-    const allData = await getCampaigns();
-    const userData = await getUserCampaigns();
+  // ✅ FETCH DATA (FIXED)
+  useEffect(() => {
+    if (!currentAccount) return; // wait for wallet
 
-     // ✅ FILTER ONLY APPROVED CAMPAIGNS
-    const approvedCampaigns = allData.filter(
-      (campaign) => campaign.approved === true
-    );
-    
-    setAllcampaign(allData);
-    setUsercampaign(userData);
-  };
+    const fetchData = async () => {
+      try {
+        const allData = await getCampaigns();
+        const userData = await getUserCampaigns();
 
-  fetchData();
-}, []);
+        const isAdmin =
+          currentAccount.toLowerCase() === ADMIN_ADDRESS.toLowerCase();
 
-  //DONATE POPUP MODEL
+        // ✅ ADMIN → see ALL campaigns
+        // ✅ USER → see ONLY approved
+        const visibleCampaigns = isAdmin
+          ? allData
+          : allData.filter((c) => c.status === "approved" && c.deadline > Date.now() );
+
+        setAllcampaign(visibleCampaigns);
+        setUsercampaign(userData);
+      } catch (error) {
+        console.log("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, [currentAccount]);
+
+  // ✅ DONATION POPUP
   const [openModel, setOpenModel] = useState(false);
-  const [donateCampaign, setDonateCampaign] = useState();
+  const [donateCampaign, setDonateCampaign] = useState(null);
 
-  console.log(donateCampaign);
-  return(
+  return (
     <>
-    <Hero titleData={titleData} createCampaign={createCampaign} />
-    <Card
-      title="All Listed Campaigns"
-      allcampaign={allcampaign}
-      setOpenModel={setOpenModel}
-      setDonateCampaign={setDonateCampaign}
-    />
-    <Card
-      title="Your Created Campaigns"
-      allcampaign={usercampaign}
-      setOpenModel={setOpenModel}
-      setDonateCampaign={setDonateCampaign}
-    />
-    {openModel && (
-      <PopUp
+      <Hero titleData={titleData} createCampaign={createCampaign} />
+
+      {/* ALL CAMPAIGNS */}
+      <Card
+        title="All Listed Campaigns"
+        allcampaign={allcampaign}
         setOpenModel={setOpenModel}
-        getDonations={getDonations}
-        donate={donateCampaign}
-        donateFunction={donate}
+        setDonateCampaign={setDonateCampaign}
       />
-    )}
-  </>
+
+      {/* USER CAMPAIGNS */}
+      <Card
+        title="Your Created Campaigns"
+        allcampaign={usercampaign}
+        setOpenModel={setOpenModel}
+        setDonateCampaign={setDonateCampaign}
+      />
+
+      {/* POPUP */}
+      {openModel && (
+        <PopUp
+          setOpenModel={setOpenModel}
+          getDonations={getDonations}
+          donate={donateCampaign}
+          donateFunction={donate}
+        />
+      )}
+    </>
   );
 };
 
-export default index;
+export default Index;
